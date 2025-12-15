@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Опрос создан</title>
+</head>
+<body>
+
+<h1>Опрос успешно создан</h1>
+
+<p><strong>ID опроса:</strong> {{ poll_id }}</p>
+
+<ul>
+    <li><a href="/admin/poll/create" target="_blank">Создать еще один</a></li>
+</ul>
+
+<form method="post" action="/admin/poll/{{ poll_id }}/activate">
+    <button type="submit">Сделать активным</button>
+</form>
+
+<p>
+    <a href="/screen" target="_blank">Открыть экран</a>
+</p>
+
+</body>
+</html>

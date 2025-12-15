@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Опрос</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        button.option {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 15px;
+            resize: none;
+        }
+        .hidden {
+            display: none;
+        }
+        .success {
+            font-size: 18px;
+            color: green;
+            margin-top: 30px;
+        }
+        #waiting {
+            font-size: 20px;
+            margin-top: 40vh;
+        }
+    </style>
+</head>
+<body>
+
+<div id="waiting">Ожидайте следующего вопроса…</div>
+
+<div id="poll-area" class="hidden">
+    <h1 id="question"></h1>
+    <div id="options"></div>
+    <div id="text-area" class="hidden">
+        <textarea id="textAnswer" placeholder="Ваш вариант ответа" rows="1" maxlength="20"></textarea>
+        <button class="option" onclick="sendText()">Отправить</button>
+    </div>
+</div>
+
+<div id="result" class="success hidden">
+    Спасибо! Ваш ответ принят 🙌
+</div>
+
+<script>
+    const userId = "{{ user_id }}";
+
+    let currentPollId = null;
+    let answered = false;
+
+    const waiting = document.getElementById("waiting");
+    const pollArea = document.getElementById("poll-area");
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const textArea = document.getElementById("text-area");
+    const result = document.getElementById("result");
+
+    function resetUI() {
+        answered = false;
+        result.classList.add("hidden");
+        optionsEl.innerHTML = "";
+        textArea.classList.add("hidden");
+    }
+
+    function renderPoll(state) {
+        resetUI();
+
+        questionEl.textContent = state.question;
+        waiting.classList.add("hidden");
+        pollArea.classList.remove("hidden");
+
+        state.options.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "option";
+            btn.textContent = opt.text;
+            btn.onclick = () => sendOption(opt.id);
+            optionsEl.appendChild(btn);
+        });
+
+        if (state.allow_text) {
+            textArea.classList.remove("hidden");
+        }
+    }
+
+    function send(payload) {
+        payload.user_id = userId;
+
+        fetch("/poll/answer", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        })
+        .then(r => {
+            if (!r.ok) throw new Error();
+            return r.json();
+        })
+        .then(() => {
+            pollArea.classList.add("hidden");
+            result.classList.remove("hidden");
+        })
+        .catch(() => {
+            alert("Ошибка отправки или вы уже отвечали");
+        });
+    }
+
+    function sendOption(optionId) {
+        if (answered) return;
+        answered = true;
+        send({ option_id: optionId });
+    }
+
+    function sendText() {
+        if (answered) return;
+        const text = document.getElementById("textAnswer").value.trim();
+        if (!text) return alert("Введите текст");
+        answered = true;
+        send({ text });
+    }
+
+    function checkState() {
+        fetch("/poll/state")
+            .then(r => r.json())
+            .then(state => {
+                if (!state.active) {
+                    currentPollId = null;
+                    pollArea.classList.add("hidden");
+                    waiting.classList.remove("hidden");
+                    return;
+                }
+
+                if (state.poll_id !== currentPollId) {
+                    currentPollId = state.poll_id;
+                    renderPoll(state);
+                }
+            });
+    }
+
+    setInterval(checkState, 2000);
+</script>
+
+</body>
+</html>

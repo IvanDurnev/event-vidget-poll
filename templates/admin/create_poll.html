@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создать опрос</title>
+    <style>
+        body { font-family: Arial; padding: 40px; }
+        input[type=text] { width: 400px; padding: 6px; }
+        .option { margin-bottom: 8px; }
+        button { padding: 6px 12px; }
+    </style>
+</head>
+<body>
+
+<h1>Создание опроса</h1>
+
+<form method="post">
+    <p>
+        <label>Вопрос:</label><br>
+        <input type="text" name="question" required>
+    </p>
+
+    <p>
+        <label>Варианты ответа:</label>
+    </p>
+
+    <div id="options">
+        <div class="option">
+            <input type="text" name="options[]" required>
+        </div>
+        <div class="option">
+            <input type="text" name="options[]" required>
+        </div>
+    </div>
+
+    <button type="button" onclick="addOption()">+ Добавить вариант</button>
+
+    <p>
+        <label>
+            <input type="checkbox" name="allow_text">
+            Разрешить свой вариант ответа
+        </label>
+    </p>
+
+    <button type="submit">Создать опрос</button>
+</form>
+
+<script>
+    function addOption() {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.innerHTML = '<input type="text" name="options[]">';
+        document.getElementById("options").appendChild(div);
+    }
+</script>
+
+</body>
+</html>

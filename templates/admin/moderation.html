@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Модерация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            padding: 20px;
+        }
+        .msg {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        .text {
+            flex: 1;
+            margin-right: 10px;
+        }
+        button {
+            font-size: 16px;
+            padding: 6px 10px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .approve { background: #2ecc71; }
+        .reject { background: #e74c3c; }
+    </style>
+</head>
+<body>
+
+<h1>Модерация сообщений</h1>
+
+<div id="list"></div>
+
+<script>
+    let currentPollId = null;
+    const list = document.getElementById("list");
+
+    function loadPending() {
+        fetch("/admin/moderation/pending")
+            .then(r => r.json())
+            .then(data => {
+                list.innerHTML = "";
+                data.forEach(text => {
+                    const div = document.createElement("div");
+                    div.className = "msg";
+                    div.innerHTML = `
+                        <div class="text">${text}</div>
+                        <div>
+                            <button class="approve">✓</button>
+                            <button class="reject">✕</button>
+                        </div>
+                    `;
+
+                    div.querySelector(".approve").onclick = () =>
+                        action("approve", text, div);
+
+                    div.querySelector(".reject").onclick = () =>
+                        action("reject", text, div);
+
+                    list.appendChild(div);
+                });
+            });
+    }
+
+    function load() {
+    fetch("/admin/moderation/state")
+        .then(r => r.json())
+        .then(state => {
+            if (!state.active) {
+                currentPollId = null;
+                list.innerHTML = "<p>Опрос не активен</p>";
+                return;
+            }
+
+            if (state.poll_id !== currentPollId) {
+                currentPollId = state.poll_id;
+                list.innerHTML = ""; // СБРОС при смене опроса
+            }
+
+            loadPending();
+        });
+}
+
+    function action(type, text, el) {
+        fetch(`/admin/moderation/${type}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ text })
+        }).then(() => el.remove());
+    }
+
+    setInterval(load, 500);
+</script>
+
+</body>
+</html>
