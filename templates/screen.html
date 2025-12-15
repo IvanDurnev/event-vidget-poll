@@ -139,10 +139,20 @@
                 },
                 scales: {
                     x: {
-                        display: false,
-                        grid: { display: false },
+                        display: true,
+                        grid: {
+                            display: false
+                        },
+                        border: {
+                            display: false
+                        },
                         ticks: {
-                            font: { size: 18 }
+                            font: {
+                                size: 24,
+                                weight: 'bold'
+                            },
+                            // color: '#fff',
+                            padding: 10
                         }
                     },
                     y: {
