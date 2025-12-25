@@ -235,7 +235,7 @@
     }
 
     function loadChatHistory() {
-        chat.innerHTML = "<h2>Чат</h2>";
+        chat.innerHTML = "<h2></h2>";
 
         fetch("/screen/chat")
             .then(r => r.json())
@@ -266,7 +266,7 @@
                     empty.style.display = "block";
                     canvas.style.display = "none";
 
-                    chat.innerHTML = "<h2>Чат</h2>";
+                    chat.innerHTML = "<h2></h2>";
 
                     if (evtSource) {
                         evtSource.close();
@@ -285,7 +285,7 @@
 
                     empty.style.display = "none";
                     canvas.style.display = "block";
-                    chat.innerHTML = "<h2>Чат</h2>";
+                    chat.innerHTML = "<h2></h2>";
 
                     if (!chart) initChart();
 
