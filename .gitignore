@@ -53,3 +53,5 @@ htmlcov/
 
 readme.md
 nginx/default.conf
+docker-compose.prod.yml
+nginx/docker.conf
